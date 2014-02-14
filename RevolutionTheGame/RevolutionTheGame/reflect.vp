@@ -1,0 +1,33 @@
+#version 400
+layout(location = 0) in vec3 position;
+layout(location = 1) in vec3 normal;
+//layout(location = 2) in vec2 textureCoords;
+
+uniform mat4 modelMatrix;
+uniform mat4 viewMatrix;
+uniform mat4 projectionMatrix;
+uniform vec3 cameraPos;
+
+smooth out vec3 vVaryingTexCoords;
+//smooth out vec3 vVaryingLightDir;
+
+void main(void)
+{
+	vec3 vNormal3f;
+	vec4 vPos4f = vec4(position, 1.0f);
+	vPos4f = modelMatrix * vPos4f;
+	vPos4f = viewMatrix * vPos4f;
+
+	// Divided by w, cause vertex is after transformations.
+	vec3 vPos3f = normalize(vPos4f.xyz / vPos4f.w);
+
+	vNormal3f = normalize(mat3(modelMatrix) * normal);
+	
+	vec3 E = normalize( vPos3f.xyz - cameraPos );
+
+	vec4 vCoords = vec4(reflect(vNormal3f, vPos3f ), 1.0);
+	//vCoords = inverse(viewMatrix) * vCoords;
+
+	gl_Position           = projectionMatrix * vPos4f;
+	vVaryingTexCoords.xyz = normalize(vCoords.xyz);
+}
